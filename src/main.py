@@ -83,12 +83,10 @@ def create_filter_row(root, table):
 def main():
     db = dataset.connect(f'sqlite:///{config["dbfile"]}')
     table = db['movies']
-
     root = tk.Tk()
     root.title("Movie Filter")
     create_filter_row(root, table)
     root.mainloop()
-
 
 if __name__ == "__main__":
     main()
