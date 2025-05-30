@@ -11,6 +11,7 @@ rootdir = os.path.dirname(curdir)
 filtered_movies = []
 tkroot = None
 filter_row_frame = None
+movie_count_label = None
 
 current_filters = {
     'studio': 'All',
@@ -76,12 +77,13 @@ def create_action_row():
     buttons_frame = tk.Frame(frame)
     buttons_frame.pack(side=tk.LEFT, padx=5)
 
-    play_selected_button = tk.Button(buttons_frame, text="Play selected")
+    play_selected_button = tk.Button(
+        buttons_frame, text="Play random", command=play_random)
     play_selected_button.pack(side=tk.LEFT, padx=2)
 
     # reset button
     reset_button = tk.Button(
-        buttons_frame, text="Reset", command=reset_filters)
+        buttons_frame, text="Reset filters", command=reset_filters)
     reset_button.pack(side=tk.LEFT, padx=2)
 
 
@@ -108,10 +110,11 @@ def create_filter_row():
                                 for row in filtered_movies if 'studio' in row and row['studio']})
     studio_var = tk.StringVar()
     studio_var.set(current_filters['studio'])
-    set_current_filters()
     studio_dropdown = tk.OptionMenu(
         studio_frame, studio_var, *studios, command=lambda value: on_filter_change('studio', value))
     studio_dropdown.pack()
+    set_current_filters()
+    create_movie_count()
 
     # Category filter
     category_frame = tk.Frame(filter_row_frame)
@@ -176,10 +179,31 @@ def fetch_all_movies():
     filtered_movies = list(table.all())
 
 
+def create_movie_count():
+    global tkroot, movie_count_label
+    if movie_count_label is not None:
+        movie_count_label.destroy()
+    movie_count_label = tk.Label(
+        tkroot, text=f"Movie count: {len(filtered_movies)}")
+    movie_count_label.pack(pady=10)
+
+
 def on_filter_change(filter_type, value):
     global current_filters
     current_filters[filter_type] = value
     set_current_filters()
+    create_movie_count()
+
+
+def play_random():
+    global filtered_movies
+    if len(filtered_movies) == 0:
+        print("No movies found")
+        return
+
+    random.shuffle(filtered_movies)
+    cmd = f"{config['movie_player']} {config['moviedir']}\\{filtered_movies[0]['rel_path']}"
+    print(cmd)
 
 
 def reset_filters():
@@ -196,7 +220,7 @@ def set_current_filters():
         if value != "All":
             filtered_movies = [
                 movie for movie in filtered_movies if movie.get(key) == value]
-    print(f"number of filetered movies: {len(filtered_movies)}")
+    print(f"number of filtered movies: {len(filtered_movies)}")
 
 
 def main():
@@ -206,6 +230,7 @@ def main():
     fetch_all_movies()
     create_filter_row()
     create_action_row()
+    create_movie_count()
     tkroot.mainloop()
 
 

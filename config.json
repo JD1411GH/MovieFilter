@@ -1,3 +1,5 @@
 {
-    "dbfile": "C:\\Users\\jyd1kor\\Documents\\moviesdb\\movies.db"
+    "dbfile": "C:\\Users\\jyd1kor\\Documents\\moviesdb\\movies.db",
+    "moviedir": "C:\\Users\\jyd1kor\\Videos",
+    "movie_player": "C:\\Program Files (x86)\\Windows Media Player\\wmplayer.exe"
 }
