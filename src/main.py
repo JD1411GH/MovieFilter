@@ -3,15 +3,20 @@ import os
 import dataset
 import tkinter as tk
 import openpyxl
+import random
 
 curdir = os.path.dirname(__file__)
 rootdir = os.path.dirname(curdir)
 
+filtered_movies = []
+tkroot = None
+filter_row_frame = None
+
+
 with open(os.path.join(rootdir, 'config.json')) as f:
     config = json.load(f)
 
-
-def convert_xls_to_sqlite(table):
+def convert_xls_to_sqlite():
     workbook = openpyxl.load_workbook(filename='LockerDB.xlsx')
     sheet = workbook.active
     headers = {header: idx for idx, header in enumerate(next(sheet.iter_rows(values_only=True)), 1)}
@@ -39,30 +44,69 @@ def convert_xls_to_sqlite(table):
             table.update(dict(id=row['id'], **updates), ['id'])
 
 
-def create_filter_row(root, table):
-    # Main frame to hold all filters
-    frame = tk.Frame(root)
+def create_action_row():
+    global tkroot
+
+    # Frame to hold the actor search input
+    frame = tk.Frame(tkroot)
     frame.pack(pady=10)
 
+    # Actor search label and entry
+    actor_search_label = tk.Label(frame, text="Search Actor:")
+    actor_search_label.pack(side=tk.LEFT)
+
+    actor_search_var = tk.StringVar()
+    actor_search_entry = tk.Entry(frame, textvariable=actor_search_var)
+    actor_search_entry.pack(side=tk.LEFT, padx=5)
+
+    # Search button
+    search_button = tk.Button(frame, text="Search")
+    search_button.pack(side=tk.LEFT, padx=5)
+
+    # Buttons frame
+    buttons_frame = tk.Frame(frame)
+    buttons_frame.pack(side=tk.LEFT, padx=5)
+
+    play_selected_button = tk.Button(buttons_frame, text="Play selected")
+    play_selected_button.pack(side=tk.LEFT, padx=2)
+
+    # reset button
+    reset_button = tk.Button(buttons_frame, text="Reset", command=reset_filters)
+    reset_button.pack(side=tk.LEFT, padx=2)
+
+def create_filter_row():
+    global filtered_movies, tkroot, filter_row_frame
+
+    # Destroy previous filter row if it exists
+    if filter_row_frame is not None:
+        filter_row_frame.destroy()
+
+    # Main frame to hold all filters
+    filter_row_frame = tk.Frame(tkroot)
+    if len(tkroot.winfo_children()) > 1:
+        filter_row_frame.pack(pady=10, before=tkroot.winfo_children()[0])
+    else:
+        filter_row_frame.pack(pady=10)
+    
     # Studio filter
-    studio_frame = tk.Frame(frame)  # Subframe for studio filter
+    studio_frame = tk.Frame(filter_row_frame)  # Subframe for studio filter
     studio_frame.pack(side=tk.LEFT, padx=10)
     studio_label = tk.Label(studio_frame, text="Studio")
     studio_label.pack()  # Default is TOP (vertical alignment)
     studios = ["All"] + sorted({row['studio']
-                                for row in table.all() if 'studio' in row and row['studio']})
+                                for row in filtered_movies if 'studio' in row and row['studio']})
     studio_var = tk.StringVar()
     studio_var.set(studios[0])
-    studio_dropdown = tk.OptionMenu(studio_frame, studio_var, *studios)
+    studio_dropdown = tk.OptionMenu(studio_frame, studio_var, *studios, command=lambda value: on_filter_change('studio', value))
     studio_dropdown.pack()
 
     # Category filter
-    category_frame = tk.Frame(frame)  # Subframe for category filter
+    category_frame = tk.Frame(filter_row_frame)  # Subframe for category filter
     category_frame.pack(side=tk.LEFT, padx=10)
     category_label = tk.Label(category_frame, text="Category")
     category_label.pack()  # Default is TOP (vertical alignment)
     categories = ["All"] + sorted({row['category']
-                                   for row in table.all() if 'category' in row and row['category']})
+                                   for row in filtered_movies if 'category' in row and row['category']})
     category_var = tk.StringVar()
     category_var.set(categories[0])
     category_dropdown = tk.OptionMenu(
@@ -70,12 +114,12 @@ def create_filter_row(root, table):
     category_dropdown.pack()
 
     # actor_rating rating filter
-    actor_rating_frame = tk.Frame(frame)  # Subframe for actor_rating filter
+    actor_rating_frame = tk.Frame(filter_row_frame)  # Subframe for actor_rating filter
     actor_rating_frame.pack(side=tk.LEFT, padx=10)
     actor_rating_label = tk.Label(actor_rating_frame, text="actor_rating")
     actor_rating_label.pack()  # Default is TOP (vertical alignment)
     actor_ratings = ["All"] + sorted({row['actor_rating']
-                                      for row in table.all() if 'actor_rating' in row and row['actor_rating']})
+                                      for row in filtered_movies if 'actor_rating' in row and row['actor_rating']})
     actor_rating_var = tk.StringVar()
     actor_rating_var.set(actor_ratings[0])
     actor_rating_dropdown = tk.OptionMenu(
@@ -83,12 +127,12 @@ def create_filter_row(root, table):
     actor_rating_dropdown.pack()
 
     # actor filter
-    actor_frame = tk.Frame(frame)
+    actor_frame = tk.Frame(filter_row_frame)
     actor_frame.pack(side=tk.LEFT, padx=10)
     actor_label = tk.Label(actor_frame, text="actor")
     actor_label.pack()
     actors = ["All"] + sorted({row['actor']
-                               for row in table.all() if 'actor' in row and row['actor']})
+                               for row in filtered_movies if 'actor' in row and row['actor']})
     actor_var = tk.StringVar()
     actor_var.set(actors[0])
     actor_dropdown = tk.OptionMenu(
@@ -96,29 +140,47 @@ def create_filter_row(root, table):
     actor_dropdown.pack()
 
     # movie_rating filter
-    movie_rating_frame = tk.Frame(frame)
+    movie_rating_frame = tk.Frame(filter_row_frame)
     movie_rating_frame.pack(side=tk.LEFT, padx=10)
     movie_rating_label = tk.Label(movie_rating_frame, text="movie_rating")
     movie_rating_label.pack()
     movie_ratings = ["All"] + sorted({row['movie_rating']
-                                      for row in table.all() if 'movie_rating' in row and row['movie_rating']})
+                                      for row in filtered_movies if 'movie_rating' in row and row['movie_rating']})
     movie_rating_var = tk.StringVar()
     movie_rating_var.set(movie_ratings[0])
     movie_rating_dropdown = tk.OptionMenu(
         movie_rating_frame, movie_rating_var, *movie_ratings)
     movie_rating_dropdown.pack()
 
-
-def main():
+def fetch_all_movies():
+    global filtered_movies
     db = dataset.connect(f'sqlite:///{config["dbfile"]}')
     table = db['movies']
-    table.delete()
-    convert_xls_to_sqlite(table)
+    # table.delete()
+    # convert_xls_to_sqlite(table)
+    filtered_movies = list(table.all())
 
-    root = tk.Tk()
-    root.title("Movie Filter")
-    create_filter_row(root, table)
-    root.mainloop()
+def on_filter_change(filter_type, value):
+    global filtered_movies
+    print(f"Filter changed: {filter_type} = {value}")
+    if value != "All":
+        filtered_movies = [movie for movie in filtered_movies if movie.get(filter_type) and movie[filter_type] == value]
+    print(f"Filtered movies count: {len(filtered_movies)}")
+
+
+def reset_filters():
+    global studio_var
+    fetch_all_movies()
+    create_filter_row()
+
+def main():
+    global tkroot
+    tkroot = tk.Tk()
+    tkroot.title("Movie Filter")
+    fetch_all_movies()
+    create_filter_row()
+    create_action_row()
+    tkroot.mainloop()
 
 if __name__ == "__main__":
     main()
