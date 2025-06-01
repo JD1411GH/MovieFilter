@@ -175,9 +175,9 @@ def create_filter_row():
 def fetch_all_movies():
     global filtered_movies
     db = dataset.connect(f'sqlite:///{config["dbfile"]}')
-    table = db['movies']
+    # table = db['movies']
     # table.delete()
-    # convert_xls_to_sqlite(table)
+    convert_xls_to_sqlite(table)
     filtered_movies = list(table.all())
 
 
