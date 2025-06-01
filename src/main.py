@@ -4,6 +4,8 @@ import dataset
 import tkinter as tk
 import openpyxl
 import random
+import subprocess
+import threading
 
 curdir = os.path.dirname(__file__)
 rootdir = os.path.dirname(curdir)
@@ -25,7 +27,7 @@ with open(os.path.join(rootdir, 'config.json')) as f:
     config = json.load(f)
 
 
-def convert_xls_to_sqlite():
+def convert_xls_to_sqlite(table):
     workbook = openpyxl.load_workbook(filename='LockerDB.xlsx')
     sheet = workbook.active
     headers = {header: idx for idx, header in enumerate(
@@ -201,9 +203,14 @@ def play_random():
         print("No movies found")
         return
 
-    random.shuffle(filtered_movies)
-    cmd = f"{config['movie_player']} {config['moviedir']}\\{filtered_movies[0]['rel_path']}"
-    print(cmd)
+    def run_player():
+        random.shuffle(filtered_movies)
+        cmd = f"{config['movie_player']} {config['moviedir']}\\{filtered_movies[0]['rel_path']}"
+        process = subprocess.Popen(cmd, shell=True)
+        process.wait()
+        print("movie is over")
+
+    threading.Thread(target=run_player, daemon=True).start()
 
 
 def reset_filters():
