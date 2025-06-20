@@ -28,6 +28,7 @@ with open(os.path.join(rootdir, 'config.json')) as f:
 
 
 def convert_xls_to_sqlite(table):
+    return # disabling old method
     table.delete()  
     workbook = openpyxl.load_workbook(filename='LockerDB.xlsx')
     sheet = workbook.active
@@ -177,7 +178,7 @@ def fetch_all_movies():
     global filtered_movies
     db = dataset.connect(f'sqlite:///{config["dbfile"]}')
     table = db['movies']
-    # convert_xls_to_sqlite(table)
+    convert_xls_to_sqlite(table)
     filtered_movies = list(table.all())
 
 
