@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Debug pyside/main.py",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/pyside/main.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}
