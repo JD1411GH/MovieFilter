@@ -1,2 +1,4 @@
 dataset
 openpyxl
+packaging
+PySide6
