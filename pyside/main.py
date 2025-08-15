@@ -27,9 +27,35 @@ class MainGUI:
         table_layout.addWidget(table, alignment=Qt.AlignHCenter)
         layout.addWidget(table_container)
 
+        # add action buttons
+        actions = self.create_actions()
+        layout.addLayout(actions)
+
         self.mainwindow.setLayout(layout)
 
 
+    def create_actions(self):
+        layout = QHBoxLayout()
+
+        # Play button
+        play_button = QPushButton("Play")
+        play_button.setStyleSheet("background-color: darkred; color: white;")
+        layout.addWidget(play_button)
+
+        # Edit button
+        edit_button = QPushButton("Edit")
+        layout.addWidget(edit_button)
+
+        # Delete button
+        delete_button = QPushButton("Delete")
+        layout.addWidget(delete_button)
+
+        # Catalog button
+        catalog_button = QPushButton("Catalog")
+        layout.addWidget(catalog_button)
+
+        return layout
+    
     def create_filters(self):
         widget = QWidget(self.mainwindow)
         layout = QVBoxLayout(widget)
@@ -96,6 +122,7 @@ class MainGUI:
 
         # Go button
         go_button = QPushButton("Go")
+        go_button.setStyleSheet("background-color: green; color: white;")
         second_row.addWidget(go_button)
 
         widget.setLayout(layout)
