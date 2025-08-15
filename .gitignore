@@ -172,5 +172,8 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Misc files
 LockerDB.xlsx
 movies.db*
+config.json

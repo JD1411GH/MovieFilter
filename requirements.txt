@@ -2,3 +2,4 @@ dataset
 openpyxl
 packaging
 PySide6
+psycopg2-binary

@@ -52,6 +52,7 @@ class MainGUI:
 
         # Catalog button
         catalog_button = QPushButton("Catalog")
+        catalog_button.clicked.connect(self.be.catalog)
         layout.addWidget(catalog_button)
 
         return layout
