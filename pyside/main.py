@@ -8,10 +8,10 @@ from backend import Backend
 class MainGUI:
     def __init__(self):
         self.app = QApplication(sys.argv)
-        self.window = QWidget()
-        self.window.setWindowTitle("Movie filter")
-        self.window.setMinimumWidth(720)
-        layout = QVBoxLayout(self.window)
+        self.mainwindow = QWidget()
+        self.mainwindow.setWindowTitle("Movie filter")
+        self.mainwindow.setMinimumWidth(720)
+        layout = QVBoxLayout(self.mainwindow)
 
         # create backend instance
         self.be = Backend()
@@ -27,12 +27,16 @@ class MainGUI:
         table_layout.addWidget(table, alignment=Qt.AlignHCenter)
         layout.addWidget(table_container)
 
-        self.window.setLayout(layout)
+        self.mainwindow.setLayout(layout)
 
 
     def create_filters(self):
-        widget = QWidget(self.window)
-        layout = QHBoxLayout(widget)
+        widget = QWidget(self.mainwindow)
+        layout = QVBoxLayout(widget)
+        first_row = QHBoxLayout(widget)
+        second_row = QHBoxLayout(widget)
+        layout.addLayout(first_row)
+        layout.addLayout(second_row)
 
         # studio dropdown
         studios = ["All"] + self.be.get_studios()
@@ -42,7 +46,7 @@ class MainGUI:
         studio_dropdown = QComboBox()
         studio_dropdown.addItems(studios)
         studio_layout.addWidget(studio_dropdown)
-        layout.addLayout(studio_layout)
+        first_row.addLayout(studio_layout)
 
         # category dropdown
         categories = ["All"] + self.be.get_categories()
@@ -52,17 +56,47 @@ class MainGUI:
         category_dropdown = QComboBox()
         category_dropdown.addItems(categories)
         category_layout.addWidget(category_dropdown)
-        layout.addLayout(category_layout)
+        first_row.addLayout(category_layout)
 
         # movie rating
         movie_ratings = ["All"] + self.be.get_movie_ratings()
         movie_rating_layout = QVBoxLayout()
-        movie_rating_label = QLabel("Select Movie Rating:")
+        movie_rating_label = QLabel("Select Min Movie Rating:")
         movie_rating_layout.addWidget(movie_rating_label)
         movie_rating_dropdown = QComboBox()
         movie_rating_dropdown.addItems(movie_ratings)
         movie_rating_layout.addWidget(movie_rating_dropdown)
-        layout.addLayout(movie_rating_layout)
+        first_row.addLayout(movie_rating_layout)
+
+        # actor rating
+        actor_ratings = ["All"] + self.be.get_actor_ratings()
+        actor_rating_layout = QVBoxLayout()
+        actor_rating_label = QLabel("Select Min Actor Rating:")
+        actor_rating_layout.addWidget(actor_rating_label)
+        actor_rating_dropdown = QComboBox()
+        actor_rating_dropdown.addItems(actor_ratings)
+        actor_rating_layout.addWidget(actor_rating_dropdown)
+        first_row.addLayout(actor_rating_layout)
+
+        # text box for Actor
+        actor_layout = QVBoxLayout()
+        actor_textbox = QLineEdit()
+        actor_textbox.setPlaceholderText("Enter Actor Name")
+        actor_layout.addWidget(actor_textbox)
+        second_row.addLayout(actor_layout)
+
+        # search button
+        search_button = QPushButton("Search")
+        second_row.addWidget(search_button)
+
+        # reset button
+        reset_button = QPushButton("Reset")
+        # reset_button.clicked.connect(self.on_reset)
+        second_row.addWidget(reset_button)
+
+        # Go button
+        go_button = QPushButton("Go")
+        second_row.addWidget(go_button)
 
         widget.setLayout(layout)
         return widget
@@ -71,7 +105,7 @@ class MainGUI:
     def create_table(self):
         table = QTableWidget(3,4)
         table.setHorizontalHeaderLabels(["", "Title", "Actor", "Movie rating"])
-        table.setMinimumWidth(600)
+        table.setMinimumWidth(15 + 600) # row enumeration + column widths
 
         table.setColumnWidth(0, 50)   # Checkbox
         table.setColumnWidth(1, 300)  # Title column
@@ -101,7 +135,7 @@ class MainGUI:
 
 
     def show(self):
-        self.window.show()
+        self.mainwindow.show()
         self.app.exec()
 
 if __name__ == "__main__":

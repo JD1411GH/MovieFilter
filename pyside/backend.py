@@ -4,6 +4,7 @@ class Backend:
         self.categories = ["Action", "Drama", "Sci-Fi"]
         self.studios = ["Warner Bros.", "Universal Pictures", "20th Century Studios"]
         self.movie_ratings = ["5", "4", "3"]
+        self.actor_ratings = ["5", "4", "3"]
 
     def get_categories(self):
         # Simulate fetching categories from a database or an API
@@ -24,3 +25,7 @@ class Backend:
     def get_movie_ratings(self):
         # Simulate fetching movie ratings from a database or an API
         return self.movie_ratings
+
+    def get_actor_ratings(self):
+        # Simulate fetching actor ratings from a database or an API
+        return self.actor_ratings
