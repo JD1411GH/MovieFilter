@@ -1,5 +1,0 @@
-{
-    "dbfile": "postgresql://neondb_owner:npg_jQZGlXefUp24@ep-royal-block-a199jyv7-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
-    "moviedir": "O:\\Microsoft\\Office\\Logs\\Locker",
-    "movie_player": "C:\\Users\\jayan\\OneDrive\\Main\\Tools\\PotPlayerPortable\\PotPlayerPortable.exe"
-}
