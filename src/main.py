@@ -28,7 +28,6 @@ with open(os.path.join(rootdir, 'config.json')) as f:
 
 
 def convert_xls_to_sqlite(table):
-    return # disabling old method
     table.delete()  
     workbook = openpyxl.load_workbook(filename='LockerDB.xlsx')
     sheet = workbook.active

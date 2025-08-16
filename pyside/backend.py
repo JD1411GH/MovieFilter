@@ -1,3 +1,4 @@
+from asyncio import sleep
 import openpyxl
 from const import *
 import json
@@ -11,6 +12,7 @@ class Backend:
 
         self.db = dataset.connect(self.config["dbfile"])
         self.table = self.db['movies']
+        print(f"Number of rows in movies table: {self.table.count()}")
 
         # TODO: populate all the filter values
         self.categories = []
@@ -19,36 +21,25 @@ class Backend:
         self.actor_ratings = []
 
     def catalog(self):
-        self.convert_xls_to_sqlite()
+        # self.convert_xls_to_sqlite()
+        pass
 
     def convert_xls_to_sqlite(self):
+        self.db.query('DROP TABLE IF EXISTS movies')
         self.table.delete()
         workbook = openpyxl.load_workbook(filename='/home/jayanta/Downloads/LockerDB.xlsx')
         sheet = workbook.active
-        headers = {header: idx for idx, header in enumerate(
-            next(sheet.iter_rows(values_only=True)), 1)}
-        for row in sheet.iter_rows(min_row=2, values_only=True):
+        for index, row in enumerate(sheet.iter_rows(min_row=2, values_only=True)):
             self.table.insert({
-                'rel_path': row[headers['rel_path'] - 1],
-                'movie_rating': row[headers['movie_rating'] - 1],
-                'actor_rating': row[headers['actor_rating'] - 1],
-                'actor': row[headers['actor'] - 1],
-                'category': row[headers['category'] - 1],
-                'studio': row[headers['studio'] - 1],
-                'last_played': "",
-                'playcount': row[headers['playcount'] - 1]
+                'rel_path': row[0],
+                'playcount': row[1],
+                'movie_rating': row[2],
+                'actor': row[4],
+                'category': row[5],
+                'studio': row[6]
             })
-        for row in self.table.all():
-            updates = {}
-            for col in ['movie_rating', 'actor_rating']:
-                val = row.get(col)
-                if val is not None:
-                    try:
-                        updates[col] = int(float(val))
-                    except (ValueError, TypeError):
-                        continue
-            if updates:
-                self.table.update(dict(id=row['id'], **updates), ['id'])
+        print("Data import complete")
+
 
     def get_categories(self):
         # Simulate fetching categories from a database or an API
