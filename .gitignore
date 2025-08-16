@@ -177,3 +177,4 @@ cython_debug/
 LockerDB.xlsx
 movies.db*
 config.json
+config.json
