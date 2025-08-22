@@ -1,9 +1,12 @@
 
+import subprocess
 from PySide6.QtWidgets import *
 from PySide6.QtCore import Qt
 import random
 import sys
 from backend import Backend
+from const import *
+import os
 
 class MainGUI:
     def __init__(self):
@@ -34,6 +37,9 @@ class MainGUI:
 
         self.mainwindow.setLayout(layout)
 
+        # global variables
+        self.filtered_movies = []
+        self.selected_movies = []
 
     def create_actions(self):
         layout = QHBoxLayout()
@@ -41,6 +47,7 @@ class MainGUI:
         # Play button
         play_button = QPushButton("Play")
         play_button.setStyleSheet("background-color: #ad025f; color: white;")
+        play_button.clicked.connect(self.play_movie)
         layout.addWidget(play_button)
 
         # Edit button
@@ -150,10 +157,9 @@ class MainGUI:
 
 
     def list_movies(self):
-        print("Listing movies...")
         # fetch the table entries from backend
-        movies = self.be.get_movies({})
-        for row, movie in enumerate(movies):
+        self.filtered_movies = self.be.get_movies({})
+        for row, movie in enumerate(self.filtered_movies):
             # Checkbox in column 0
             checkbox = QCheckBox()
             cell_widget = QWidget()
@@ -164,11 +170,43 @@ class MainGUI:
             self.table_ui.setCellWidget(row, 0, cell_widget)
 
             # Title, Actor, Rating
-            self.table_ui.setItem(row, 1, QTableWidgetItem(movie["rel_path"]))
+            title = movie["rel_path"].split("\\")[-1]
+            self.table_ui.setItem(row, 1, QTableWidgetItem(title))
             self.table_ui.setItem(row, 2, QTableWidgetItem(movie["actor"]))
             movie_rating_item = QTableWidgetItem(str(movie["movie_rating"]))
             movie_rating_item.setTextAlignment(Qt.AlignCenter)
             self.table_ui.setItem(row, 3, movie_rating_item)
+
+    
+    def play_movie(self):
+        if len(self.filtered_movies) == 0:
+            self.list_movies()
+        
+        if len(self.selected_movies) == 0:
+            movie_to_play = self.filtered_movies[0]['rel_path']
+            if sys.platform.startswith("linux"):
+                movie_to_play = movie_to_play.replace("\\", "/")
+
+        movie_dir = CONFIG['movie_dir']
+        if sys.platform.startswith("linux"):
+            movie_dir = movie_dir.replace("\\", "/")
+        movie_path = os.path.join(movie_dir, movie_to_play)
+
+        # check if player supports fullscreen flag
+        fullscreen = ""
+        try:
+            result = subprocess.run([CONFIG['movie_player'], "--help"],
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                text=True,
+                                timeout=5)
+            if "--fullscreen" in result.stdout:
+                fullscreen = "--fullscreen"
+        except Exception as e:
+            fullscreen = ""
+
+        # Play
+        subprocess.Popen([CONFIG['movie_player'], fullscreen, movie_path])
 
     def show(self):
         self.mainwindow.show()

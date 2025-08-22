@@ -7,11 +7,7 @@ import random
 
 class Backend:
     def __init__(self):
-        # read config
-        with open(os.path.join(ROOTDIR, 'config.json')) as f:
-            self.config = json.load(f)
-
-        self.db = dataset.connect(self.config["dbfile"])
+        self.db = dataset.connect(CONFIG["dbfile"])
         self.table_movies = self.db['movies']
         self.table_actors = self.db['actors']
 
