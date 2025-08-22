@@ -3,6 +3,7 @@ import openpyxl
 from const import *
 import json
 import dataset
+import random
 
 class Backend:
     def __init__(self):
@@ -22,7 +23,7 @@ class Backend:
         self.actors = []
 
     def catalog(self):
-        self.convert_xls_to_sqlite()
+        # self.convert_xls_to_sqlite()
         pass
 
     def convert_xls_to_sqlite(self):
@@ -56,10 +57,17 @@ class Backend:
         # Simulate fetching categories from a database or an API
         return self.categories
 
-    def get_movies(self   ):
-        # Simulate fetching movies from a database or an API
-        return [
-        ]
+    def get_movies(self, filters):
+        filtered_movies = list(self.table_movies.all())
+        random.shuffle(filtered_movies)
+        ret = []
+        for movie in filtered_movies[:10]:
+            ret.append({
+            'rel_path': movie['rel_path'],
+            'actor': movie['actor'],
+            'movie_rating': movie['movie_rating']
+            })
+        return ret
 
     def get_studios(self):
         # Simulate fetching studios from a database or an API

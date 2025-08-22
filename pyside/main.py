@@ -11,6 +11,7 @@ class MainGUI:
         self.mainwindow = QWidget()
         self.mainwindow.setWindowTitle("Movie filter")
         self.mainwindow.setMinimumWidth(720)
+        self.mainwindow.setMinimumHeight(520)
         layout = QVBoxLayout(self.mainwindow)
 
         # create backend instance
@@ -21,10 +22,10 @@ class MainGUI:
         layout.addWidget(filters)
 
         # add table
-        table = self.create_table()
+        self.table_ui = self.create_table()
         table_container = QWidget()
         table_layout = QHBoxLayout(table_container)
-        table_layout.addWidget(table, alignment=Qt.AlignHCenter)
+        table_layout.addWidget(self.table_ui, alignment=Qt.AlignHCenter)
         layout.addWidget(table_container)
 
         # add action buttons
@@ -39,7 +40,7 @@ class MainGUI:
 
         # Play button
         play_button = QPushButton("Play")
-        play_button.setStyleSheet("background-color: darkred; color: white;")
+        play_button.setStyleSheet("background-color: #ad025f; color: white;")
         layout.addWidget(play_button)
 
         # Edit button
@@ -54,6 +55,10 @@ class MainGUI:
         catalog_button = QPushButton("Catalog")
         catalog_button.clicked.connect(self.be.catalog)
         layout.addWidget(catalog_button)
+
+        # History button
+        history_button = QPushButton("History")
+        layout.addWidget(history_button)
 
         return layout
     
@@ -121,17 +126,18 @@ class MainGUI:
         # reset_button.clicked.connect(self.on_reset)
         second_row.addWidget(reset_button)
 
-        # Go button
-        go_button = QPushButton("Go")
-        go_button.setStyleSheet("background-color: green; color: white;")
-        second_row.addWidget(go_button)
+        # List button
+        list_button = QPushButton("List")
+        list_button.setStyleSheet("background-color: green; color: white;")
+        list_button.clicked.connect(self.list_movies)
+        second_row.addWidget(list_button)
 
         widget.setLayout(layout)
         return widget
 
 
     def create_table(self):
-        table = QTableWidget(3,4)
+        table = QTableWidget(10,4)
         table.setHorizontalHeaderLabels(["", "Title", "Actor", "Movie rating"])
         table.setMinimumWidth(15 + 600) # row enumeration + column widths
 
@@ -140,8 +146,13 @@ class MainGUI:
         table.setColumnWidth(2, 150)  # Actor column
         table.setColumnWidth(3, 100)  # Movie rating column
 
+        return table
+
+
+    def list_movies(self):
+        print("Listing movies...")
         # fetch the table entries from backend
-        movies = self.be.get_movies()
+        movies = self.be.get_movies({})
         for row, movie in enumerate(movies):
             # Checkbox in column 0
             checkbox = QCheckBox()
@@ -150,17 +161,14 @@ class MainGUI:
             cell_layout.addWidget(checkbox)
             cell_layout.setAlignment(checkbox, Qt.AlignCenter)
             cell_layout.setContentsMargins(0, 0, 0, 0)
-            table.setCellWidget(row, 0, cell_widget)
-            
+            self.table_ui.setCellWidget(row, 0, cell_widget)
+
             # Title, Actor, Rating
-            table.setItem(row, 1, QTableWidgetItem(movie["rel_path"]))
-            table.setItem(row, 2, QTableWidgetItem(movie["actor"]))
+            self.table_ui.setItem(row, 1, QTableWidgetItem(movie["rel_path"]))
+            self.table_ui.setItem(row, 2, QTableWidgetItem(movie["actor"]))
             movie_rating_item = QTableWidgetItem(str(movie["movie_rating"]))
             movie_rating_item.setTextAlignment(Qt.AlignCenter)
-            table.setItem(row, 3, movie_rating_item)
-
-        return table
-
+            self.table_ui.setItem(row, 3, movie_rating_item)
 
     def show(self):
         self.mainwindow.show()
