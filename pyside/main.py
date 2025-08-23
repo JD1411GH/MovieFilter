@@ -1,4 +1,3 @@
-
 import subprocess
 from PySide6.QtWidgets import *
 from PySide6.QtCore import Qt
@@ -10,6 +9,14 @@ import os
 
 class MainGUI:
     def __init__(self):
+        # global variables
+        self.filtered_movies = []
+        self.selected_movie = None
+        self.radio_group = QButtonGroup()
+        self.radio_group.setExclusive(True)
+        self.radio_group.buttonClicked.connect(self.select_movie)
+
+        # GUI setup
         self.app = QApplication(sys.argv)
         self.mainwindow = QWidget()
         self.mainwindow.setWindowTitle("Movie filter")
@@ -37,9 +44,7 @@ class MainGUI:
 
         self.mainwindow.setLayout(layout)
 
-        # global variables
-        self.filtered_movies = []
-        self.selected_movies = []
+        
 
     def create_actions(self):
         layout = QHBoxLayout()
@@ -159,13 +164,19 @@ class MainGUI:
     def list_movies(self):
         # fetch the table entries from backend
         self.filtered_movies = self.be.get_movies({})
+        self.radio_group = QButtonGroup()  # Reset group for each listing
+        self.radio_group.setExclusive(True)
+        self.radio_group.buttonClicked.connect(self.select_movie)
+        self.table_ui.clearContents()
+        self.selected_movie = None  # Reset selection
         for row, movie in enumerate(self.filtered_movies):
-            # Checkbox in column 0
-            checkbox = QCheckBox()
+            # Radio button in column 0
+            radio = QRadioButton()
+            self.radio_group.addButton(radio, row)
             cell_widget = QWidget()
             cell_layout = QHBoxLayout(cell_widget)
-            cell_layout.addWidget(checkbox)
-            cell_layout.setAlignment(checkbox, Qt.AlignCenter)
+            cell_layout.addWidget(radio)
+            cell_layout.setAlignment(radio, Qt.AlignCenter)
             cell_layout.setContentsMargins(0, 0, 0, 0)
             self.table_ui.setCellWidget(row, 0, cell_widget)
 
@@ -177,15 +188,23 @@ class MainGUI:
             movie_rating_item.setTextAlignment(Qt.AlignCenter)
             self.table_ui.setItem(row, 3, movie_rating_item)
 
-    
+    def select_movie(self, button):
+        selected_row = self.radio_group.id(button)
+        if 0 <= selected_row < len(self.filtered_movies):
+            self.selected_movie = self.filtered_movies[selected_row]
+        else:
+            self.selected_movie = None
+
     def play_movie(self):
         if len(self.filtered_movies) == 0:
             self.list_movies()
         
-        if len(self.selected_movies) == 0:
+        if self.selected_movie is None:
             movie_to_play = self.filtered_movies[0]['rel_path']
-            if sys.platform.startswith("linux"):
-                movie_to_play = movie_to_play.replace("\\", "/")
+        else:
+            movie_to_play = self.selected_movie['rel_path']
+        if sys.platform.startswith("linux"):
+            movie_to_play = movie_to_play.replace("\\", "/")
 
         movie_dir = CONFIG['movie_dir']
         if sys.platform.startswith("linux"):
