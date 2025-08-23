@@ -49,6 +49,12 @@ class Backend:
         print("Data import complete")
 
 
+    def delete_movie(self, rel_path):
+        movie = self.table_movies.find_one(rel_path=rel_path)
+        if movie:
+            self.table_movies.delete(movie['id'])
+        print(f"Deleted movie with rel_path: {rel_path}")
+
     def get_categories(self):
         # Simulate fetching categories from a database or an API
         return self.categories

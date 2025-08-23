@@ -61,6 +61,7 @@ class MainGUI:
 
         # Delete button
         delete_button = QPushButton("Delete")
+        delete_button.clicked.connect(lambda: self.be.delete_movie(self.selected_movie['rel_path']))
         layout.addWidget(delete_button)
 
         # Catalog button
